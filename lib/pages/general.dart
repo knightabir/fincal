@@ -1,3 +1,6 @@
+import 'package:fincal/general/Inflation.dart';
+import 'package:fincal/general/compoundInterest.dart';
+import 'package:fincal/general/simpleInterest.dart';
 import 'package:flutter/material.dart';
 
 class General extends StatelessWidget {
@@ -6,25 +9,25 @@ class General extends StatelessWidget {
 
   static final List<Map<String, dynamic>> calculators = [
     {
-      'name': 'Compound Interest',
-      'description': 'Calculate the compounded growth of your investment over time.',
-      'icon': Icons.trending_up, // Suitable for growth visualization
-      'gradient': [const Color(0xFF00C9FF), const Color(0xFF92FE9D)], // Blue-green for growth and clarity
-      'navigatorBuilder': null,
-    },
-    {
       'name': 'Simple Interest',
       'description': 'Quickly compute the interest earned on a fixed principal.',
       'icon': Icons.attach_money, // Emphasizes financial value
       'gradient': [const Color(0xFF7E57C2), const Color(0xFF512DA8)], // Purple shades for trust and calculation
-      'navigatorBuilder': null,
+      'navigatorBuilder': () => SimpleInterest(),
+    },
+    {
+      'name': 'Compound Interest',
+      'description': 'Calculate the compounded growth of your investment over time.',
+      'icon': Icons.trending_up, // Suitable for growth visualization
+      'gradient': [const Color(0xFF00C9FF), const Color(0xFF92FE9D)], // Blue-green for growth and clarity
+      'navigatorBuilder': () => CompoundInterest(),
     },
     {
       'name': 'Inflation',
       'description': 'See how inflation affects the value of money over a selected period.',
       'icon': Icons.trending_down, // Illustrates the diminishing effect
       'gradient': [const Color(0xFF26A69A), const Color(0xFF00695C)], // Green tones to represent economy and stability
-      'navigatorBuilder': null,
+      'navigatorBuilder': () => Inflation(),
     }
 
  ];
