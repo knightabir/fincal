@@ -1,4 +1,8 @@
 import 'package:fincal/bank/emiCalculator.dart';
+import 'package:fincal/bankandpostoffice/kisanVikasPatra.dart';
+import 'package:fincal/bankandpostoffice/mahilaSammanSavingsCertificate.dart';
+import 'package:fincal/bankandpostoffice/seniorCitizenSavingsScheme.dart';
+import 'package:fincal/bankandpostoffice/sukanyaSamriddhi.dart';
 import 'package:flutter/material.dart';
 
 class BankAndPostOffice extends StatelessWidget {
@@ -17,28 +21,28 @@ class BankAndPostOffice extends StatelessWidget {
       'description': 'Calculate contributions and returns under the SSA for girl child savings.',
       'icon': Icons.family_restroom, // Symbolic of family/girl child
       'gradient': [Color(0xFF26A69A), Color(0xFF00695C)], // Supportive green tones
-      'navigatorBuilder': null,
+      'navigatorBuilder': () => SukanyaSamriddhiYojana(),
     },
     {
       'name': 'Senior Citizens Savings Scheme',
       'description': 'Compute interest income and maturity under the SCSS for retirees.',
       'icon': Icons.elderly, // Clearly represents senior citizens
       'gradient': [Color(0xFF7E57C2), Color(0xFF512DA8)], // Calm purple for stability
-      'navigatorBuilder': null,
+      'navigatorBuilder': () => SeniorCitizenSavingsScheme(),
     },
     {
       'name': 'Kishan Vikas Patra',
       'description': 'Estimate the doubling period and returns from KVP investments.',
       'icon': Icons.agriculture, // Rural/farmer-focused scheme
       'gradient': [Color(0xFF5C6BC0), Color(0xFF3949AB)], // Agricultural blue tones
-      'navigatorBuilder': null,
+      'navigatorBuilder': () => KisanVikasPatra(),
     },
     {
       'name': 'Mahila Samman Savings Certificate',
       'description': 'Calculate interest and maturity for the MSSC—designed to empower women.',
       'icon': Icons.woman, // Represents women-focused schemes
       'gradient': [Color(0xFF66BB6A), Color(0xFF388E3C)], // Empowering green tones
-      'navigatorBuilder': null,
+      'navigatorBuilder': () => MahilaSavingsSamman(),
     }
   ];
 
