@@ -1,3 +1,5 @@
+import 'package:fincal/bank/fixedDeposit.dart';
+import 'package:fincal/bank/recurringdeposit.dart';
 import 'package:flutter/material.dart';
 import '../bank/emiCalculator.dart';
 
@@ -7,46 +9,46 @@ class BankPage extends StatelessWidget {
   static final List<Map<String, dynamic>> calculators = [
     {
       'name': 'Loan (Basic)',
-      'description': 'Calculate your basic loan EMI payments',
-      'icon': Icons.calculate,
-      'gradient': [const Color(0xFF42A5F5), const Color(0xFF1E88E5)],
+      'description': 'Calculate simple EMI for personal or car loans',
+      'icon': Icons.attach_money,
+      'gradient': [const Color(0xFF4FC3F7), const Color(0xFF0288D1)],
       'navigatorBuilder': () => EmiCalculatorPage(),
     },
     {
       'name': 'Loan (Advanced)',
-      'description': 'Calculate your advanced loan EMI payments',
-      'icon': Icons.account_balance,
-      'gradient': [const Color(0xFF26A69A), const Color(0xFF00695C)],
+      'description': 'Advanced EMI with prepayment and breakdown analysis',
+      'icon': Icons.trending_up,
+      'gradient': [const Color(0xFF26C6DA), const Color(0xFF006064)],
       'navigatorBuilder': null,
     },
     {
       'name': 'Fixed Deposit (TDR)',
-      'description': 'Calculate Fixed Deposit -TDR (Interest Payout)',
-      'icon': Icons.percent,
-      'gradient': [const Color(0xFF7E57C2), const Color(0xFF512DA8)],
-      'navigatorBuilder': null,
+      'description': 'Calculate interest payout from term deposits (TDR)',
+      'icon': Icons.account_balance_wallet,
+      'gradient': [const Color(0xFF9575CD), const Color(0xFF512DA8)],
+      'navigatorBuilder': () => FixedDeposit(),
     },
     {
       'name': 'Fixed Deposit (STDR)',
-      'description': 'Calculate Fixed Deposit -STDR (Cumulative)',
-      'icon': Icons.payment,
-      'gradient': [const Color(0xFF5C6BC0), const Color(0xFF3949AB)],
-      'navigatorBuilder': null,
+      'description': 'Compute cumulative returns on STDR deposits',
+      'icon': Icons.savings_outlined,
+      'gradient': [const Color(0xFF7986CB), const Color(0xFF303F9F)],
+      'navigatorBuilder': () => FixedDeposit(),
     },
     {
       'name': 'Recurring Deposit',
-      'description': 'Plan your recurring deposits',
-      'icon': Icons.savings,
-      'gradient': [const Color(0xFF66BB6A), const Color(0xFF388E3C)],
-      'navigatorBuilder': null,
+      'description': 'Plan and calculate regular monthly savings growth',
+      'icon': Icons.schedule,
+      'gradient': [const Color(0xFF81C784), const Color(0xFF2E7D32)],
+      'navigatorBuilder': () => RecurringDeposit(),
     },
     {
-      'name': 'Interest Deposit',
-      'description': 'Plan your interest deposits',
-      'icon': Icons.credit_card,
-      'gradient': [const Color(0xFFFF9800), const Color(0xFFE65100)],
+      'name': 'Interest Rates (%)',
+      'description': 'View and plan with customizable interest rates',
+      'icon': Icons.insert_chart_outlined,
+      'gradient': [const Color(0xFFFFB74D), const Color(0xFFF57C00)],
       'navigatorBuilder': null,
-    }
+    },
   ];
 
   @override

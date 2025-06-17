@@ -1,106 +1,137 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'dart:math';
 
-class EmiCalculatorPage extends StatefulWidget {
-  const EmiCalculatorPage({super.key});
+class RecurringDeposit extends StatefulWidget {
+  const RecurringDeposit({super.key});
 
   @override
-  _EmiCalculatorPageState createState() => _EmiCalculatorPageState();
+  State<RecurringDeposit> createState() => _RecurringDepositState();
 }
 
-class _EmiCalculatorPageState extends State<EmiCalculatorPage> {
-  final TextEditingController _principalController = TextEditingController();
+class _RecurringDepositState extends State<RecurringDeposit> {
+  // Controllers
+  final TextEditingController _installmentController = TextEditingController();
   final TextEditingController _rateController = TextEditingController();
-  final TextEditingController _timeController = TextEditingController();
-  String _timeType = 'months';
+  final TextEditingController _tenureController = TextEditingController();
 
-  double? _emi;
-  double? _totalPaid;
-  double? _interestPaid;
-  double? _principal;
+  // Dropdown value for tenure type
+  String _tenureType = 'Years';
 
-  void _calculate() {
-    try {
-      // Parse input values
-      double? principal = double.tryParse(_principalController.text.trim());
-      double? rate = double.tryParse(_rateController.text.trim());
-      int? time = int.tryParse(_timeController.text.trim());
+  // Results
+  double _totalValue = 0;
+  double _investedAmount = 0;
+  double _estimatedReturn = 0;
 
-      if (principal == null || rate == null || time == null) {
-        _showErrorMessage('Please enter valid numbers for all fields');
-        return;
-      }
+  // Result visibility flag
+  bool _showResults = false;
 
-      if (principal <= 0 || rate <= 0 || time <= 0) {
-        _showErrorMessage('All values must be positive numbers');
-        return;
-      }
-
-      if (_principalController.text.isEmpty ||
-          _rateController.text.isEmpty ||
-          _timeController.text.isEmpty) {
-        _showErrorMessage('Please fill all fields');
-        return;
-      }
-
-      double emi = calculateEmi(principal, rate, time, _timeType);
-      int totalMonths = _timeType == 'months' ? time : time * 12;
-      double totalPaid = emi * totalMonths;
-      double interestPaid = totalPaid - principal;
-
-      setState(() {
-        _principal = principal;
-        _emi = emi;
-        _totalPaid = double.parse(totalPaid.toStringAsFixed(2));
-        _interestPaid = double.parse(interestPaid.toStringAsFixed(2));
-      });
-    } catch (e) {
-      _showErrorMessage('Error calculating EMI: ${e.toString()}');
-    }
+  @override
+  void dispose() {
+    _installmentController.dispose();
+    _rateController.dispose();
+    _tenureController.dispose();
+    super.dispose();
   }
 
-  void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.orange[600],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+  void _calculateRD() {
+    // Validate input fields
+    if (_installmentController.text.isEmpty ||
+        _rateController.text.isEmpty ||
+        _tenureController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please fill all fields'),
+          backgroundColor: Colors.orange[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
-  double calculateEmi(double principal, double rate, int time, String type) {
-    if (principal <= 0 || rate <= 0 || time <= 0) {
-      throw ArgumentError('All values must be positive numbers.');
+      );
+      return;
     }
 
-    if (type != 'months' && type != 'years') {
-      throw ArgumentError('Time type must be either "months" or "years".');
+    // Parse inputs
+    double monthlyInstallment = double.tryParse(_installmentController.text) ?? 0;
+    double annualRate = double.tryParse(_rateController.text) ?? 0;
+    double tenure = double.tryParse(_tenureController.text) ?? 0;
+
+    // Validate positive values and minimum tenure
+    if (monthlyInstallment <= 0 || annualRate <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter valid positive values'),
+          backgroundColor: Colors.orange[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+      return;
+    }
+    if (_tenureType == 'Years' && tenure < 0.0833) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Tenure must be at least 1 month (0.0833 years)'),
+          backgroundColor: Colors.orange[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+      return;
+    }
+    if (_tenureType == 'Months' && tenure < 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Tenure must be at least 1 month'),
+          backgroundColor: Colors.orange[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+      return;
     }
 
-    double monthlyRate = rate / 12 / 100;
-    int months = type == 'months' ? time : time * 12;
+    // Convert tenure to months
+    double totalMonths = _tenureType == 'Months' ? tenure : tenure * 12;
 
-    double emi = principal * monthlyRate * pow(1 + monthlyRate, months) /
-        (pow(1 + monthlyRate, months) - 1);
+    // Calculate RD maturity: A = Σ [P × (1 + R/N)^(N × t)] for each month
+    double maturityAmount = 0;
+    const int compoundingFrequency = 4; // Quarterly compounding
+    double quarterlyRate = annualRate / 100 / compoundingFrequency; // R/N
+    for (int month = 1; month <= totalMonths; month++) {
+      double timeInYears = (totalMonths - month + 1) / 12; // Time remaining for each installment
+      maturityAmount += monthlyInstallment * pow(1 + quarterlyRate, compoundingFrequency * timeInYears);
+    }
 
-    return double.parse(emi.toStringAsFixed(2));
-  }
+    // Calculate invested amount and return
+    double investedAmount = monthlyInstallment * totalMonths;
+    double estimatedReturn = maturityAmount - investedAmount;
 
-  void _reset() {
+    // Update state with results
     setState(() {
-      _principalController.clear();
+      _totalValue = maturityAmount.roundToDouble();
+      _investedAmount = investedAmount;
+      _estimatedReturn = estimatedReturn.roundToDouble();
+      _showResults = true;
+    });
+  }
+
+  void _resetRD() {
+    setState(() {
+      _installmentController.clear();
       _rateController.clear();
-      _timeController.clear();
-      _timeType = 'months';
-      _emi = null;
-      _totalPaid = null;
-      _interestPaid = null;
-      _principal = null;
+      _tenureController.clear();
+      _tenureType = 'Years';
+      _totalValue = 0;
+      _investedAmount = 0;
+      _estimatedReturn = 0;
+      _showResults = false;
     });
   }
 
@@ -138,7 +169,7 @@ class _EmiCalculatorPageState extends State<EmiCalculatorPage> {
           ),
           child: TextField(
             controller: controller,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: TextInputType.number,
             decoration: InputDecoration(
               hintText: hint,
               prefixIcon: Icon(
@@ -195,17 +226,17 @@ class _EmiCalculatorPageState extends State<EmiCalculatorPage> {
             ],
           ),
           child: DropdownButtonFormField<String>(
-            value: _timeType,
+            value: _tenureType,
             onChanged: (String? newValue) {
               setState(() {
-                _timeType = newValue!;
+                _tenureType = newValue!;
               });
             },
-            items: <String>['months', 'years']
+            items: <String>['Years', 'Months']
                 .map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
-                child: Text(value.capitalize()),
+                child: Text(value),
               );
             }).toList(),
             decoration: InputDecoration(
@@ -349,7 +380,7 @@ class _EmiCalculatorPageState extends State<EmiCalculatorPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'EMI Calculator',
+          'Recurring Deposit Calculator',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 22,
@@ -373,25 +404,25 @@ class _EmiCalculatorPageState extends State<EmiCalculatorPage> {
               children: [
                 const SizedBox(height: 20),
                 _buildInputField(
-                  label: 'Principal Amount',
-                  hint: 'Enter loan amount',
-                  controller: _principalController,
+                  label: 'Monthly Installment',
+                  hint: 'Enter monthly investment',
+                  controller: _installmentController,
                   prefix: ' ₹ ',
                   icon: Icons.monetization_on_outlined,
                 ),
                 const SizedBox(height: 20),
                 _buildInputField(
-                  label: 'Annual Interest Rate',
-                  hint: 'Enter interest rate',
+                  label: 'Rate of Interest (p.a.)',
+                  hint: 'Enter annual interest rate',
                   controller: _rateController,
                   prefix: ' % ',
                   icon: Icons.trending_up,
                 ),
                 const SizedBox(height: 20),
                 _buildInputField(
-                  label: 'Loan Duration',
-                  hint: 'Enter duration',
-                  controller: _timeController,
+                  label: 'Tenure',
+                  hint: 'Enter tenure',
+                  controller: _tenureController,
                   prefix: ' ',
                   icon: Icons.calendar_today,
                 ),
@@ -399,11 +430,11 @@ class _EmiCalculatorPageState extends State<EmiCalculatorPage> {
                 _buildTenureTypeDropdown(),
                 const SizedBox(height: 30),
                 _buildActionButtons(
-                  onCalculate: _calculate,
-                  onReset: _reset,
+                  onCalculate: _calculateRD,
+                  onReset: _resetRD,
                 ),
                 const SizedBox(height: 30),
-                if (_emi != null && _principal != null && _totalPaid != null && _interestPaid != null) ...[
+                if (_showResults) ...[
                   Text(
                     'Investment Summary',
                     style: TextStyle(
@@ -414,31 +445,24 @@ class _EmiCalculatorPageState extends State<EmiCalculatorPage> {
                   ),
                   const SizedBox(height: 16),
                   _buildResultCard(
-                    title: 'Monthly EMI',
-                    amount: _emi!,
+                    title: 'Total Value',
+                    amount: _totalValue,
                     color: Colors.green[600]!,
-                    icon: Icons.payments,
+                    icon: Icons.trending_up,
                   ),
                   const SizedBox(height: 12),
                   _buildResultCard(
-                    title: 'Principal Amount',
-                    amount: _principal!,
+                    title: 'Invested Amount',
+                    amount: _investedAmount,
                     color: Colors.blue[600]!,
                     icon: Icons.account_balance_wallet,
                   ),
                   const SizedBox(height: 12),
                   _buildResultCard(
-                    title: 'Total Interest',
-                    amount: _interestPaid!,
+                    title: 'Estimated Return',
+                    amount: _estimatedReturn,
                     color: Colors.orange[600]!,
-                    icon: Icons.trending_up,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildResultCard(
-                    title: 'Total Payment',
-                    amount: _totalPaid!,
-                    color: Colors.purple[600]!,
-                    icon: Icons.receipt_long,
+                    icon: Icons.savings,
                   ),
                 ],
               ],
@@ -447,20 +471,5 @@ class _EmiCalculatorPageState extends State<EmiCalculatorPage> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _principalController.dispose();
-    _rateController.dispose();
-    _timeController.dispose();
-    super.dispose();
-  }
-}
-
-// Extension to capitalize strings
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }
