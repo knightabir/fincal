@@ -1,3 +1,8 @@
+import 'package:fincal/bank/recurringdeposit.dart';
+import 'package:fincal/postoffice/monthlyIncomeScheme.dart';
+import 'package:fincal/postoffice/nationalSavingsCertificate.dart';
+import 'package:fincal/postoffice/recurringDeposit.dart';
+import 'package:fincal/postoffice/timeDeposit.dart';
 import 'package:flutter/material.dart';
 
 class PostOfficePage extends StatelessWidget {
@@ -9,28 +14,28 @@ class PostOfficePage extends StatelessWidget {
       'description': 'Calculate expected monthly payouts from the Post Office MIS investment.',
       'icon': Icons.payments, // Monthly payout representation
       'gradient': [Color(0xFF42A5F5), Color(0xFF1E88E5)], // Calm and structured blue tones
-      'navigatorBuilder': null,
+      'navigatorBuilder': () => MonthlyIncomeScheme(),
     },
     {
       'name': 'Recurring Deposit',
       'description': 'Estimate maturity amount and interest for your RD contributions.',
       'icon': Icons.autorenew, // Recurring nature of deposits
       'gradient': [Color(0xFF26A69A), Color(0xFF00695C)], // Green for growth and consistency
-      'navigatorBuilder': null,
+      'navigatorBuilder': () => RecurringDepositPost(),
     },
     {
       'name': 'Time Deposit',
       'description': 'Calculate interest and maturity value for fixed-term deposits.',
       'icon': Icons.access_time, // Reflects the time-bound nature
       'gradient': [Color(0xFF7E57C2), Color(0xFF512DA8)], // Purple for trust and planning
-      'navigatorBuilder': null,
+      'navigatorBuilder': () => TimeDeposit(),
     },
     {
       'name': 'National Savings Certificate',
       'description': 'Compute returns and maturity value for NSC investments.',
       'icon': Icons.sticky_note_2, // Certificate/document icon
       'gradient': [Color(0xFF5C6BC0), Color(0xFF3949AB)], // Formal and financial tone
-      'navigatorBuilder': null,
+      'navigatorBuilder': () => NationalSavingsCertificate(),
     },
     {
       'name': 'Interest Rates',
